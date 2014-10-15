@@ -36,6 +36,10 @@ import javax.validation.constraints.Size;
     @NamedQuery(name = "Gcmdevice.findByModel", query = "SELECT g FROM Gcmdevice g WHERE g.model = :model"),
     @NamedQuery(name = "Gcmdevice.findBySerialNumber", query = "SELECT g FROM Gcmdevice g WHERE g.serialNumber = :serialNumber")})
 public class Gcmdevice implements Serializable {
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "citizenID")
+    private int citizenID;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -155,6 +159,14 @@ public class Gcmdevice implements Serializable {
     @Override
     public String toString() {
         return "com.codetribe.ca.data.Gcmdevice[ gcmdeviceID=" + gcmdeviceID + " ]";
+    }
+
+    public int getCitizenID() {
+        return citizenID;
+    }
+
+    public void setCitizenID(int citizenID) {
+        this.citizenID = citizenID;
     }
     
 }

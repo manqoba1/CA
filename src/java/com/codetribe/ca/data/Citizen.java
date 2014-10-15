@@ -178,6 +178,10 @@ public class Citizen implements Serializable {
         this.township = township;
     }
 
+    public Township getTownship() {
+        return township;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
