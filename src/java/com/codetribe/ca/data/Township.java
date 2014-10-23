@@ -56,7 +56,7 @@ public class Township implements Serializable {
     @NotNull
     @Column(name = "longitude")
     private double longitude;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "townshi")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "township")
     private List<Citizen> citizenList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "township")
     private List<Townshipbusiness> townshipbusinessList;
@@ -64,7 +64,7 @@ public class Township implements Serializable {
     private List<Townshippolicestation> townshippolicestationList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "township")
     private List<Facility> facilityList;
-    @JoinColumn(name = "cityID", referencedColumnName = "city")
+    @JoinColumn(name = "cityID", referencedColumnName = "cityID")
     @ManyToOne(optional = false)
     private City city;
     @JoinColumn(name = "municipalityID", referencedColumnName = "municipalityID")
