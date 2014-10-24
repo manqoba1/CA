@@ -9,17 +9,23 @@ import com.codetribe.ca.data.Business;
 import com.codetribe.ca.data.Citizen;
 import com.codetribe.ca.data.Executive;
 import com.codetribe.ca.data.Municipality;
+import com.codetribe.ca.data.Policeofficer;
 import com.codetribe.ca.data.Policestation;
+import com.codetribe.ca.data.Stationofficer;
 import com.codetribe.ca.data.Township;
 import com.codetribe.ca.data.Townshipbusiness;
 import com.codetribe.ca.data.Townshippolicestation;
+import com.codetribe.ca.data.Vendor;
 import com.codetribe.ca.dto.BusinessDTO;
 import com.codetribe.ca.dto.CitizenDTO;
 import com.codetribe.ca.dto.ExecutiveDTO;
+import com.codetribe.ca.dto.PoliceofficerDTO;
 import com.codetribe.ca.dto.PolicestationDTO;
 import com.codetribe.ca.dto.TownshipbusinessDTO;
 import com.codetribe.ca.dto.TownshippolicestationDTO;
+import com.codetribe.ca.dto.VendorDTO;
 import com.codetribe.ca.dto.transfer.ResponseDTO;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.Stateless;
@@ -57,8 +63,7 @@ public class DataUtil {
             }
             c.setTownship(t);
             em.persist(c);
-            Query q = em.createNamedQuery("Citizen.findByPhoneNumber", Citizen.class);
-            q.setParameter("phoneNumber", ci.getPhoneNumber());
+            em.flush();
             resp.setTownship(listUtil.getTownshipData(t.getTownshipID()).getTownship());
             resp.setPolicestationList(listUtil.getTownshipData(t.getTownshipID()).getPolicestationList());
             resp.setBusinessList(listUtil.getTownshipData(t.getTownshipID()).getBusinessList());
@@ -90,6 +95,38 @@ public class DataUtil {
         return resp;
     }
 
+    public ResponseDTO registerPoliceOfficer(PoliceofficerDTO s, int policestationID) throws DataException {
+        ResponseDTO resp = new ResponseDTO();
+        try {
+            Policeofficer e = new Policeofficer();
+            e.setName(s.getName());
+            e.setBadgeNo(s.getBadgeNo());
+
+            em.persist(e);
+            em.flush();
+            addPoliceOfficerToStation(e, policestationID);
+        } catch (Exception e) {
+            log.log(Level.SEVERE, "Failed", e);
+            throw new DataException("Failed");
+        }
+        return resp;
+    }
+
+    private void addPoliceOfficerToStation(Policeofficer po, int policestationID) throws DataException {
+        try {
+            Stationofficer b = new Stationofficer();
+            b.setPoliceOfficer(po);
+            b.setPoliceStation(em.find(Policestation.class, policestationID));
+            b.setDateAssigned(new Date());
+
+            em.persist(b);
+            
+        } catch (Exception e) {
+            log.log(Level.SEVERE, "Failed", e);
+            throw new DataException("Failed");
+        }
+    }
+
     public void addBusiness(BusinessDTO dto) throws DataException {
 
         try {
@@ -104,6 +141,23 @@ public class DataUtil {
             throw new DataException("Failed");
         }
 
+    }
+
+    public ResponseDTO addVendor(VendorDTO dto) throws DataException {
+        ResponseDTO resp = new ResponseDTO();
+        try {
+            Vendor v = new Vendor();
+            v.setVendorName(dto.getVendorName());
+
+            em.persist(v);
+            Query q = em.createNamedQuery("Vendor.findByVendorName");
+            q.setParameter("vendorName", dto.getVendorID());
+            resp.getVendorList().add(new VendorDTO(v));
+        } catch (Exception e) {
+            log.log(Level.SEVERE, "Failed", e);
+            throw new DataException("Failed");
+        }
+        return resp;
     }
 
     public ResponseDTO addBusinessToTownship(TownshipbusinessDTO dto, ListUtil listUtil) throws DataException {
@@ -131,9 +185,7 @@ public class DataUtil {
             b.setTownship(em.find(Township.class, dto.getTownship().getTownshipID()));
 
             em.persist(b);
-            Query q = em.createNamedQuery("Townshippolicestation.findBytown");
-            q.setParameter("townshipID", dto.getTownship().getTownshipID());
-
+            em.flush();
             resp.getPolicestationList().add(dto.getPoliceStation());
         } catch (Exception e) {
             log.log(Level.SEVERE, "Failed", e);
